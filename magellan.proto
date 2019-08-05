@@ -1,0 +1,19 @@
+syntax = "proto3";
+package magellan;
+
+message Variable {
+    string name = 1;
+    string value = 2;
+}
+
+message Response {
+    string data = 1;
+}
+
+service gRPC {
+    rpc SetVariable (Variable) returns (Response) {
+    }
+    rpc GetVariable (string) returns (Response) {
+
+    }
+}
