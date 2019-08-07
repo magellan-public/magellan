@@ -12,7 +12,7 @@ def compile(file, variables):
         print(astunparse.dump(root))
         visitor.visit(root)
 
-        # fp.dump()
+        fp.dump()
         # fp.gen_pit_pipeline()
         # fp.dump_pit()
         # fp.gen_p4()

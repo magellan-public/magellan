@@ -2,7 +2,7 @@ from magellan.magellan_pb2 import *
 from magellan.magellan_pb2_grpc import *
 from concurrent import futures
 import time, json
-from compiler.compiler import compile
+from compiler.__init__ import compile
 
 _HOST = 'localhost'
 _PORT = '7777'
@@ -17,7 +17,7 @@ class gRPCServicerImpl(gRPCServicer):
     def SetVariable(self, request, context):
         print ("called with " + request.name)
         variables[request.name] = json.loads(request.value)
-        compile('apps/l3/on_packet.py', variables)
+        compile('apps/l3/on_packet.mag', variables)
         return Response()
 
 
