@@ -20,3 +20,9 @@ This compiler has 2 functions:
 
 ## Coding Notes
 * Use python3 interpreter so that we support python 3 annotation grammar
+
+## Architecture
+![Image text](https://raw.githubusercontent.com/guodong/magellan-pcl/master/docs/arch.png)
+
+## Workflows
+![Image text](https://raw.githubusercontent.com/guodong/magellan-pcl/master/docs/workflow.png)
