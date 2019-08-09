@@ -116,7 +116,7 @@ class NodeVisitor(ast.NodeVisitor):
                 self.fp.add_instruction(inst)
                 self.guardStack.append(gv)
 
-                inst = Instruction(self.guardStack[-1], [], [], 'toController')
+                inst = Instruction(self.guardStack[-1], [self.fp.get_variable('pkt'), self.fp.get_variable('inport')], [var], 'toController')
                 self.fp.add_instruction(inst)
                 self.guardStack.pop()
             elif node.func.attr == 'lpm':
