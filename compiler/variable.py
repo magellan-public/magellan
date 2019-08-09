@@ -3,7 +3,6 @@ class Variable:
         self.name = name
         self.value = None
         self.type = None
-        self.isGlobal = False
         self.ssa = []
         self.ssa_id = 0
         self.aliases = []
@@ -16,7 +15,16 @@ class Variable:
         else:
             return self.name
 
+
 class RefVariable(Variable):
     def __init__(self, name, dst):
         super(RefVariable, self).__init__(name, 'ref')
         self.dst = dst
+
+
+# a = 1
+# a = assign(_v1)
+class ConstantVariable(Variable):
+    def __init__(self, name, value):
+        super().__init__(name)
+        self.value = value

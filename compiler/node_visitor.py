@@ -45,8 +45,7 @@ class NodeVisitor(ast.NodeVisitor):
         return Variable(astunparse.unparse(node).strip())
 
     def visit_Str(self, node):
-        var = self.fp.new_variable(node.s)
-        var.value = node.s
+        var = self.fp.new_constant_variable(node.s)
         return var
 
 
@@ -57,13 +56,11 @@ class NodeVisitor(ast.NodeVisitor):
                 self.fp.add_variable(variable)
 
             gv = self.fp.new_guard_variable()
-            var = self.fp.new_variable()
-            var.value = node.args.args[1].annotation.s
+            var = self.visit(node.args.args[1].annotation)
             inst = Instruction(self.guardStack[-1], [self.fp.new_variable('inport_label'), var],
                                [gv], 'eq')
             self.fp.add_instruction(inst)
             self.guardStack.append(gv)
-
             self.generic_visit(node)
             self.guardStack.pop()
 
@@ -82,6 +79,7 @@ class NodeVisitor(ast.NodeVisitor):
         for b in node.body:
             self.visit(b)
         o = self.guardStack.pop()
+
         if len(node.orelse) > 0:
             elsegv = self.fp.new_guard_variable()
             inst = Instruction(self.guardStack[-1], [o], [elsegv], 'not')
@@ -118,7 +116,7 @@ class NodeVisitor(ast.NodeVisitor):
                 self.fp.add_instruction(inst)
                 self.guardStack.append(gv)
 
-                inst = Instruction(self.guardStack[-1], [self.fp.get_variable(node.func.value.id)], [var], 'assign')
+                inst = Instruction(self.guardStack[-1], [], [], 'toController')
                 self.fp.add_instruction(inst)
                 self.guardStack.pop()
             elif node.func.attr == 'lpm':
