@@ -1,0 +1,11 @@
+
+global_mac_table = {} # mac -> the 'h->e' port ('00:00...' -> 's1:1')
+
+
+def on_packet(pkt, inport: 'external_ingress'):
+  global_mac_table.insert(pkt.eth.src, inport, 500) # key, value, timeout
+
+  if pkt.eth.dst in global_mac_table:
+    return shortestPath(inport, global_mac_table[pkt.eth.dst]), pkt
+  else:
+    return spanningTree(), pkt

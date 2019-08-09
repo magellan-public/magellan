@@ -2,7 +2,7 @@
 from compiler import compile
 
 if __name__ == '__main__':
-    app_dir = 'apps/l3'
+    app_dir = 'apps/l2'
     dp_file = app_dir + '/on_packet.mag'
     offline_file = app_dir + '/offline.py'
     out_dir = 'out'
