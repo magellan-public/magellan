@@ -147,14 +147,14 @@ class NodeVisitor(ast.NodeVisitor):
         self.fp.add_instruction(inst)
 
     def visit_Tuple(self, node):
-        var = self.fp.new_variable()
-        var.type = 'tuple'
         elts = []
         for elt in node.elts:
             elts.append(self.visit(elt))
 
-        inst = Instruction(self.guardStack[-1], elts, [var], 'tuple')
-        self.fp.add_instruction(inst)
+        var = self.fp.new_tuple_variable(elts)
+
+        # inst = Instruction(self.guardStack[-1], elts, [var], 'tuple')
+        # self.fp.add_instruction(inst)
 
         return var
 

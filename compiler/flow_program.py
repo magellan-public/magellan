@@ -1,4 +1,4 @@
-from compiler.variable import Variable, ConstantVariable
+from compiler.variable import Variable, ConstantVariable, TupleVariable
 from jinja2 import Template
 
 class FlowProgram:
@@ -31,6 +31,12 @@ class FlowProgram:
     def new_constant_variable(self, value):
         name = self.__gen_variable_name()
         var = ConstantVariable(name, value)
+        self.variables.append(var)
+        return var
+
+    def new_tuple_variable(self, elts):
+        name = self.__gen_variable_name()
+        var = TupleVariable(name, elts)
         self.variables.append(var)
         return var
 
