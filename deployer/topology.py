@@ -1,14 +1,49 @@
 import json
 import networkx as nx
 
+
 def generate_graph(jsonFile):
     with open(jsonFile) as json_file:
         data = json.load(json_file)
     return data
 
+
+# add edges
+def initialize_dg(dg, topo):
+    links = topo['links']
+    for link in links:
+        src_port_id = link['source']
+        dst_port_id = link['destination']
+        src_node = src_port_id.split(':')[0]
+        dst_node = dst_port_id.split(':')[0]
+        dg.add_edge(src_node, dst_node)
+
+
+def initialize_g(g, topo):
+    links = topo['links']
+    added_edge = []
+    for link in links:
+        link_id = link['id']
+        if link_id not in added_edge:
+            src_port_id = link['source']
+            dst_port_id = link['destination']
+            src_node = src_port_id.split(':')[0]
+            dst_node = dst_port_id.split(':')[0]
+            g.add_edge(src_node, dst_node)
+            added_edge.append(link_id)
+            rv_link_id = dst_port_id + '-' + src_port_id
+            added_edge.append(rv_link_id)
+
+
+
 class topology:
     def __init__(self, jsonFile):
         self.topo = generate_graph(jsonFile)
+        self.dg = nx.DiGraph()
+        self.g = nx.Graph()
+        initialize_dg(self.dg, self.topo)
+        initialize_g(self.g, self.topo)
+
 
     def get_switches(self):
         nodes = self.topo['nodes']
@@ -61,7 +96,34 @@ class topology:
                 ports_tag.append(port['id'])
         return ports_tag
 
+    def get_single_link_id(self, src_sw, dst_sw):
+        links = self.topo['links']
+        for link in links:
+            src_port_id = link['source']
+            dst_port_id = link['destination']
+            src_sw_compare = src_port_id.split(':')[0]
+            dst_sw_compare = dst_port_id.split(':')[0]
+            if src_sw == src_sw_compare and dst_sw == dst_sw_compare:
+                return link['id']
+
+    def shortestPath(self, src_port, dst_port):
+        src_node = src_port.split(':')[0]
+        dst_node = dst_port.split(':')[0]
+        sp = nx.shortest_path(self.dg, src_node, dst_node)
+        return sp
+
+    def stp_edges(self):
+        edges = nx.minimum_spanning_edges(self.g)
+        return list(edges)
+
+    def path_in_stp(self, src_port, dst_port):
+        tree = nx.minimum_spanning_tree(self.g)
+        src_node = src_port.split(':')[0]
+        dst_node = dst_port.split(':')[0]
+        sp = nx.shortest_path(tree, src_node, dst_node)
+        return sp
+
 
 if __name__ == '__main__':
     topology = topology("../topologies/l2.json")
-    print(topology.get_ports_with_tag('external_ingress'))
+    print(topology.path_in_stp('s1:1', 'h2:1'))
