@@ -65,11 +65,8 @@ class Pipeline:
                         if key in nameValueTable:
                             valueTable = nameValueTable[key]
                             if value not in valueTable:
-                                valueTable[value] = 0
-                            else:
-                                temp = valueTable[value]
-                                temp += 1
-                                valueTable[value] = temp
+                                count = len(valueTable)
+                                valueTable[value] = count
                         else:
                             valueTable = {}
                             valueTable[value] = 0
@@ -146,7 +143,7 @@ class FlowRule:
                     action = GlobalAction(TERMINAL_ACTION, value, None, None)
                     self.actions.append(action)
                 else:
-                    action = GlobalAction(NON_TERMINAL_ACTION, None, key, nameValueTable[key][value])
+                    action = GlobalAction(NON_TERMINAL_ACTION, None, nameTable[key], nameValueTable[key][value])
                     self.actions.append(action)
 
     def dump(self):
@@ -163,9 +160,6 @@ class GlobalAction:
         self.action = action  # is valid only type is TERMINAL_ACTION
         self.key = key
         self.value = value
-
-    def __str__(self):
-        return self.action
 
     def __repr__(self):
         if self.type == NON_TERMINAL_ACTION:
