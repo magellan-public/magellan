@@ -13,6 +13,6 @@ def compile(file, variables):
         visitor.visit(root)
 
         fp.dump()
-        # fp.gen_pit_pipeline()
-        # fp.dump_pit()
+        fp.gen_pit_pipeline()
+        fp.dump_pit()
         # fp.gen_p4()

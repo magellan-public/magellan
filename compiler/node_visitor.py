@@ -15,7 +15,7 @@ class NodeVisitor(ast.NodeVisitor):
         if isinstance(node.value, ast.Dict):
             variable = self.fp.get_variable(node.targets[0].id, True)
             variable.type = 'map'
-            if variable.value is None:
+            if len(variable.value)== 0 :
                 variable.value = {}
             # if self.context is None:
             #     variable.isGlobal = True

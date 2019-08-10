@@ -9,11 +9,12 @@ class datastoreProxy:
 
 
     def get_topo(self):
-        topo = topology('../topologies/' + self.topoJson)
+        topo = topology('D:/CZU/PengCheng/magellan-pcl/topologies/' + self.topoJson)
         return topo
 
 if __name__ == '__main__':
     ds = datastoreProxy('l2.json')
     topo = ds.get_topo()
-    print(topo.get_host_ports())
+    #print(topo.get_host_ports())
+    print(topo.get_external_ports())
 
