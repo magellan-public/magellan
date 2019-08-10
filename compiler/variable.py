@@ -1,7 +1,7 @@
 class Variable:
     def __init__(self, name):
         self.name = name
-        self.value = None
+        self.value = []
         self.type = None
         self.ssa = []
         self.ssa_id = 0
@@ -9,9 +9,9 @@ class Variable:
 
     def dump(self):
         if self.type == 'int':
-            return '%s(%s)' % (self.name, str(self.values[0]))
+            return '%s(%s)' % (self.name, str(self.value[0]))
         elif self.type == 'str':
-            return '%s(\'%s\')' % (self.name, str(self.values[0]))
+            return '%s(\'%s\')' % (self.name, str(self.value[0]))
         else:
             return self.name
 
@@ -27,7 +27,7 @@ class RefVariable(Variable):
 class ConstantVariable(Variable):
     def __init__(self, name, value):
         super().__init__(name)
-        self.value = value
+        self.value = [value]
 
 
 class TupleVariable(Variable):

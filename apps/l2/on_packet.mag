@@ -8,4 +8,4 @@ def on_packet(pkt, inport: 'external_ingress'):
   if pkt.eth.dst in global_mac_table:
     return shortestPath(inport, global_mac_table[pkt.eth.dst]), pkt
   else:
-    return spanningTree(), pkt
+    return spanningTree(inport), pkt

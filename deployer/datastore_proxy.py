@@ -16,5 +16,6 @@ class DatastoreProxy:
 if __name__ == '__main__':
     ds = DatastoreProxy('l2.json')
     topo = ds.get_topo()
-    print(topo.get_host_ports())
+    #print(topo.get_host_ports())
+    print(topo.get_external_ports())
 
