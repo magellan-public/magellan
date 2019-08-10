@@ -115,17 +115,25 @@ class Instruction:
         	    if self.gv is not None:
         	        entry[DATA].update({self.gv.name:TRUE})
         	    self.pit.entries.append(entry)
-        	entry = {
+        	if isinstance(self.inputs[Biao],ConstantVariable):
+        	    entryD = {
+                    PRIORITY:0,
+                    DATA:{
+                    self.inputs[(1-Biao)].name: MATCHANY,
+                    self.outputs[0].name: NEbiao}
+                    }
+        	else:
+        	    entryD = {
                     PRIORITY:0,
                     DATA:{
                     self.inputs[0].name: MATCHANY,
                     self.inputs[1].name: MATCHANY,
                     self.outputs[0].name: NEbiao}
                 }
-        	
+
         	if self.gv is not None:
-        	    entry[DATA].update({self.gv.name:TRUE})
-        	self.pit.entries.append(entry)
+        	    entryD[DATA].update({self.gv.name:TRUE})
+        	self.pit.entries.append(entryD)
         elif self.mapping == 'assign' :  #input can't be map
             if  self.outputs[0].name == "return":
                 self.pit=None
