@@ -1,19 +1,20 @@
 """
 This module should connect to datastore to get data e.g., topology
 """
-from topology import topology
+from topology import Topology
 
-class datastoreProxy:
+
+class DatastoreProxy:
     def __init__(self, topoJson):
         self.topoJson = topoJson
 
 
     def get_topo(self):
-        topo = topology('../topologies/' + self.topoJson)
+        topo = Topology('../topologies/' + self.topoJson)
         return topo
 
 if __name__ == '__main__':
-    ds = datastoreProxy('l2.json')
+    ds = DatastoreProxy('l2.json')
     topo = ds.get_topo()
     print(topo.get_host_ports())
 

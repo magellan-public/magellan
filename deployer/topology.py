@@ -35,8 +35,7 @@ def initialize_g(g, topo):
             added_edge.append(rv_link_id)
 
 
-
-class topology:
+class Topology:
     def __init__(self, jsonFile):
         self.topo = generate_graph(jsonFile)
         self.dg = nx.DiGraph()
@@ -125,5 +124,5 @@ class topology:
 
 
 if __name__ == '__main__':
-    topology = topology("../topologies/l2.json")
+    topology = Topology("../topologies/l2.json")
     print(topology.path_in_stp('s1:1', 'h2:1'))
