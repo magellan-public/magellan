@@ -15,4 +15,5 @@ def compile(file, variables):
         fp.dump()
         fp.gen_pit_pipeline()
         fp.dump_pit()
+        return fp.ret_pit_pipeline()
         # fp.gen_p4()

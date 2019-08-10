@@ -1,5 +1,5 @@
 from compiler.table import Table
-from compiler.variable import RefVariable
+from compiler.variable import RefVariable,ConstantVariable,TupleVariable
 NONSENSE="None"
 MATCHANY="*"
 PRIORITY="pri"
@@ -78,7 +78,11 @@ class Instruction:
         		NEbiao=FALSE
         	for input in self.inputs:
         	    self.pit.schema.inputs.append(input.name)
-        	if(len(self.inputs[0].value)<len(self.inputs[1].value)): #constant=[1],map不可以eq/neq
+        	if isinstance(self.inputs[0],ConstantVariable):
+        	    Biao=0
+        	elif isinstance(self.inputs[1],ConstantVariable):
+        	    Biao=1
+        	elif (len(self.inputs[0].value)<len(self.inputs[1].value)):
         		Biao=0
         	else:
         	    Biao=1
@@ -105,20 +109,22 @@ class Instruction:
         	    entry[DATA].update({self.gv.name:TRUE})
         	self.pit.entries.append(entry)
         elif self.mapping == 'assign' :  #input can't be map
-            for input in self.inputs:
-                self.pit.schema.inputs.append(input.name)
-
-            for i in self.inputs[0].value:
-                entry = {
-                PRIORITY:1,
-                DATA :{
-                    self.inputs[0].name: i,
-                    self.outputs[0].name: i
+            if  self.outputs[0].name == "return":
+                self.pit=None
+            else:
+                for input in self.inputs:
+                    self.pit.schema.inputs.append(input.name)  
+                for i in self.inputs[0].value:
+                    entry = {
+                    PRIORITY:1,
+                    DATA :{
+                        self.inputs[0].name: i,
+                        self.outputs[0].name: i
+                        }
                     }
-                }
-                if self.gv is not None:
-                    entry[DATA].update({self.gv.name:TRUE})
-                self.pit.entries.append(entry)
+                    if self.gv is not None:
+                        entry[DATA].update({self.gv.name:TRUE})
+                    self.pit.entries.append(entry)
         elif self.mapping == 'shortestPath':
         	for input in self.inputs:
         	    self.pit.schema.inputs.append(input.name)
@@ -132,6 +138,7 @@ class Instruction:
 	                    self.outputs[0].name: "shortestPath("+i+","+j+")"
 	                    }
 	                }
+        	 	    self.outputs[0].value.append( "shortestPath("+i+","+j+")")
         	 	    if self.gv is not None:
         	 	        entry[DATA].update({self.gv.name:TRUE})
         	 	    self.pit.entries.append(entry)
@@ -147,6 +154,7 @@ class Instruction:
                     self.outputs[0].name: "spanningTree("+i+")"
                     }
                 }
+                self.outputs[0].value.append( "spanningTree("+i+")")
                 if self.gv is not None:
                     entry[DATA].update({self.gv.name:TRUE})
                 self.pit.entries.append(entry)
@@ -287,16 +295,15 @@ class Instruction:
         #     gv = self.gv.name
         #     print '%s | %s -> %s' % (gv, '|'.join(self.pit.schema.inputs), '|'.join(self.pit.schema.outputs))
         # else:
-        print (PRIORITY,end='|')
-        print ('%s -> %s' % ('|'.join(self.pit.schema.inputs), '|'.join(self.pit.schema.outputs)))
-
-
-        for entry in self.pit.entries:
-        	print (entry[PRIORITY] ,end='|')
-        	for input_name in self.pit.schema.inputs:
-        	    print (entry[DATA][input_name], end= '|')
-        	for output_name in self.pit.schema.outputs:
-        		print (entry[DATA][output_name])
+        if not(self.pit is None):
+            print (PRIORITY,end='|')
+            print ('%s -> %s' % ('|'.join(self.pit.schema.inputs), '|'.join(self.pit.schema.outputs)))
+            for entry in self.pit.entries:
+                print (entry[PRIORITY] ,end='|')
+                for input_name in self.pit.schema.inputs:
+                    print (entry[DATA][input_name], end= '|')
+                for output_name in self.pit.schema.outputs:
+                    print (entry[DATA][output_name])
 
     '''
     def dump_pit(self):
