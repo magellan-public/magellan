@@ -11,10 +11,12 @@ if __name__ == '__main__':
     out_dir = 'out'
     portTag, pipeline = compile(dp_file, None)
 
+    '''
     for table in pipeline:
         print("inputs: " + str(table.schema.inputs))
         print("outputs: " + str(table.schema.outputs))
         print(str(table.entries))
+    '''
 
     ds = DatastoreProxy('topologies/l2.json')
     fg = FlowRulesGenerator(ds)

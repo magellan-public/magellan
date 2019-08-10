@@ -151,7 +151,6 @@ class Topology:
         sp = nx.shortest_path(self.fullDg, src_port, dst_port)
         return sp
 
-
     def stp_edges(self):
         edges = nx.minimum_spanning_edges(self.g)
         return list(edges)
@@ -161,6 +160,11 @@ class Topology:
         src_node = src_port.split(':')[0]
         dst_node = dst_port.split(':')[0]
         sp = nx.shortest_path(tree, src_node, dst_node)
+        return sp
+
+    def path_in_stp_full(self, src_port, dst_port):
+        tree = nx.minimum_spanning_tree(self.fullG)
+        sp = nx.shortest_path(tree, src_port, dst_port)
         return sp
 
 
