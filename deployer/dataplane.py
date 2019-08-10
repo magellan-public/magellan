@@ -175,6 +175,12 @@ class GlobalAction:
         else:
             return self.action
 
+    def __str__(self):
+        if self.type == NON_TERMINAL_ACTION:
+            return "set " + str(self.key) + " to " + str(self.value)
+        else:
+            return self.action
+
 
 if __name__ == '__main__':
     type = get_type('10.0.0.1')

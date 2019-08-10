@@ -35,6 +35,37 @@ def initialize_g(g, topo):
             added_edge.append(rv_link_id)
 
 
+# add edges
+def initialize_full_dg(fullDg, topo):
+    links = topo['links']
+    for link in links:
+        src_port_id = link['source']
+        dst_port_id = link['destination']
+        src_node = src_port_id.split(':')[0]
+        dst_node = dst_port_id.split(':')[0]
+        fullDg.add_edge(src_port_id, dst_port_id)
+        fullDg.add_edge(src_node, src_port_id)
+        fullDg.add_edge(dst_port_id, dst_node)
+
+
+def initialize_full_g(fullG, topo):
+    links = topo['links']
+    added_edge = []
+    for link in links:
+        link_id = link['id']
+        if link_id not in added_edge:
+            src_port_id = link['source']
+            dst_port_id = link['destination']
+            src_node = src_port_id.split(':')[0]
+            dst_node = dst_port_id.split(':')[0]
+            fullG.add_edge(src_port_id, dst_port_id)
+            fullG.add_edge(src_node, src_port_id)
+            fullG.add_edge(dst_port_id, dst_node)
+            added_edge.append(link_id)
+            rv_link_id = dst_port_id + '-' + src_port_id
+            added_edge.append(rv_link_id)
+
+
 class Topology:
     def __init__(self, jsonFile):
         self.topo = generate_graph(jsonFile)
@@ -42,6 +73,11 @@ class Topology:
         self.g = nx.Graph()
         initialize_dg(self.dg, self.topo)
         initialize_g(self.g, self.topo)
+
+        self.fullDg = nx.DiGraph()
+        self.fullG = nx.Graph()
+        initialize_full_dg(self.fullDg, self.topo)
+        initialize_full_g(self.fullG, self.topo)
 
 
     def get_switches(self):
@@ -105,11 +141,16 @@ class Topology:
             if src_sw == src_sw_compare and dst_sw == dst_sw_compare:
                 return link['id']
 
-    def shortestPath(self, src_port, dst_port):
+    def shortestPath_nodes(self, src_port, dst_port):
         src_node = src_port.split(':')[0]
         dst_node = dst_port.split(':')[0]
         sp = nx.shortest_path(self.dg, src_node, dst_node)
         return sp
+
+    def shortestPath_full(self, src_port, dst_port):
+        sp = nx.shortest_path(self.fullDg, src_port, dst_port)
+        return sp
+
 
     def stp_edges(self):
         edges = nx.minimum_spanning_edges(self.g)
