@@ -10,6 +10,7 @@ DROP = 6
 PUNT = 7
 Null = 8
 ANY = 9
+LABEL = 10
 
 
 def get_type(value):
@@ -33,3 +34,5 @@ def get_type(value):
         return Null
     elif value == '*':
         return ANY
+    else:
+        return LABEL

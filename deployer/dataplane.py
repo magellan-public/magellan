@@ -29,7 +29,7 @@ class Pipeline:
             outputs = schema.outputs
 
             for input in inputs:
-                if 'pkt' in input:
+                if 'pkt' in input or input == 'inport_label':
                     nameTable[input] = input
                 else:
                     if input not in nameTable:
@@ -54,12 +54,12 @@ class Pipeline:
             for entry in entries:
                 kvs = entry['data']
                 for key in kvs:
-                    print(key)
+                    # print(key)
                     value = kvs[key]
-                    print(value)
+                    # print(value)
                     if get_type(value) == MAC or get_type(value) == IPv4 or get_type(value) == ANY\
                             or get_type(value) == SP or get_type(value) == STP or get_type(value) == DROP\
-                            or get_type(value) == PUNT:
+                            or get_type(value) == PUNT or get_type(value) == LABEL:
                         continue
                     else:
                         if key in nameValueTable:
@@ -85,6 +85,7 @@ class Pipeline:
 class PipelineTable:
     def __init__(self, id, table, nameTable, nameValueTable):
         self.tableId = id
+        self.matches = []
         self.flowRules = []
 
         self.initialize(table, nameTable, nameValueTable)
@@ -99,6 +100,10 @@ class PipelineTable:
         for entry in entries:
             flowRule = FlowRule(entry, inputs, outputs, nameTable, nameValueTable)
             self.flowRules.append(flowRule)
+
+        for input in inputs:
+            match = nameTable[input]
+            self.matches.append(match)
 
     def dump(self):
         print("table id: " + str(self.tableId))
@@ -133,7 +138,7 @@ class FlowRule:
             value = kvs[key]
             if key in inputs:
                 type = get_type(value)
-                if type == MAC or type == IPv4 or type == ANY:
+                if type == MAC or type == IPv4 or type == ANY or type == LABEL:
                     self.matches[nameTable[key]] = value
                 else:
                     self.matches[nameTable[key]] = nameValueTable[key][value]
@@ -143,6 +148,7 @@ class FlowRule:
                     action = GlobalAction(TERMINAL_ACTION, value, None, None)
                     self.actions.append(action)
                 else:
+                    # print('flowrule initialize: ' + str(key))
                     action = GlobalAction(NON_TERMINAL_ACTION, None, nameTable[key], nameValueTable[key][value])
                     self.actions.append(action)
 
