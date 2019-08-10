@@ -35,14 +35,22 @@ class Instruction:
                     entry[DATA].update({self.gv.name:TRUE})
                 self.pit.entries.append(entry)
                 self.outputs[0].value.append(v)
-            entry = { PRIORITY:0,
+            entry1 = { PRIORITY:1,
                 DATA:{
                     self.inputs[1].name: MATCHANY,
                     self.outputs[0].name: NONSENSE}
             }
             if self.gv is not None:
-                entry[DATA].update({self.gv.name:FALSE})
-            self.pit.entries.append(entry)
+                entry1[DATA].update({self.gv.name:FALSE})
+            self.pit.entries.append(entry1)
+            entry2 = { PRIORITY:0,
+                DATA:{
+                    self.inputs[1].name: MATCHANY,
+                    self.outputs[0].name: NONSENSE}
+            }
+            if self.gv is not None:
+                entry2[DATA].update({self.gv.name:TRUE})
+            self.pit.entries.append(entry2)
         elif self.mapping == 'in':
             self.pit.schema.inputs.append(self.inputs[0].name)
             v = self.inputs[1]
@@ -79,24 +87,34 @@ class Instruction:
         	for input in self.inputs:
         	    self.pit.schema.inputs.append(input.name)
         	if isinstance(self.inputs[0],ConstantVariable):
+        	    self.pit.schema.inputs.remove(self.inputs[0].name)
         	    Biao=0
         	elif isinstance(self.inputs[1],ConstantVariable):
+        	    self.pit.schema.inputs.remove(self.inputs[1].name)
         	    Biao=1
         	elif (len(self.inputs[0].value)<len(self.inputs[1].value)):
         		Biao=0
         	else:
         	    Biao=1
         	for ev in self.inputs[Biao].value:
-        		entry = {
+        	    if isinstance(self.inputs[Biao],ConstantVariable):
+        	        entry = {
                     PRIORITY:1,
                     DATA:{
-                    self.inputs[0].name: ev,
-                    self.inputs[1].name: ev,
+                    self.inputs[(1-Biao)].name: ev,
                     self.outputs[0].name: Ebiao}
-                }
-        		if self.gv is not None:
-        		    entry[DATA].update({self.gv.name:TRUE})
-        		self.pit.entries.append(entry)
+                    }
+        	    else:
+        	        entry = {
+                        PRIORITY:1,
+                        DATA:{
+                        self.inputs[0].name: ev,
+                        self.inputs[1].name: ev,
+                        self.outputs[0].name: Ebiao}
+                    }
+        	    if self.gv is not None:
+        	        entry[DATA].update({self.gv.name:TRUE})
+        	    self.pit.entries.append(entry)
         	entry = {
                     PRIORITY:0,
                     DATA:{
