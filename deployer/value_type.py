@@ -16,12 +16,6 @@ LABEL = 10
 def get_type(value):
     if value == 'True' or value == 'False':
         return GV
-    elif re.match("s|h[0-9]+\:[0-9]+", value):
-        return PORT
-    elif re.match("(?:[0-9a-fA-F]:?){12}", value):
-        return MAC
-    elif re.match("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", value):
-        return IPv4
     elif 'shortestPath' in value:
         return SP
     elif 'spanningTree' in value:
@@ -30,6 +24,12 @@ def get_type(value):
         return DROP
     elif 'toController' in value:
         return PUNT
+    elif re.match("s|h[0-9]+\:[0-9]+", value):
+        return PORT
+    elif re.match("(?:[0-9a-fA-F]:?){12}", value):
+        return MAC
+    elif re.match("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", value):
+        return IPv4
     elif value == 'None':
         return Null
     elif value == '*':

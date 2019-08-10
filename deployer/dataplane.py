@@ -143,8 +143,10 @@ class FlowRule:
                 else:
                     self.matches[nameTable[key]] = nameValueTable[key][value]
             else:
+                # print(value)
                 type = get_type(value)
                 if type == SP or type == STP or type == PUNT or type == DROP:
+                    # print(value)
                     action = GlobalAction(TERMINAL_ACTION, value, None, None)
                     self.actions.append(action)
                 else:
@@ -175,7 +177,7 @@ class GlobalAction:
 
 
 if __name__ == '__main__':
-    type = get_type('None')
+    type = get_type('10.0.0.1')
     print(type)
 
 
