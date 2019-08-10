@@ -75,6 +75,12 @@ class FlowProgram:
         for inst in self.instructions:
             inst.gen_pit()
 
+    def ret_pit_pipeline(self):
+        retlist=[]
+        for inst in self.instructions:
+            if not(inst.pit is None):
+                retlist.append(inst.pit)
+        return self.get_variable('__v1').value[0],retlist   #port_label, list(pit_table)
     def dump(self):
         print('++++++ flow program ++++++')
         for inst in self.instructions:

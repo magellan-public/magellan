@@ -9,7 +9,8 @@ class datastoreProxy:
 
 
     def get_topo(self):
-        topo = topology('D:/CZU/PengCheng/magellan-pcl/topologies/' + self.topoJson)
+        #topo = topology('D:/CZU/PengCheng/magellan-pcl/topologies/' + self.topoJson)
+        topo = topology('../topologies/' + self.topoJson)
         return topo
 
 if __name__ == '__main__':
