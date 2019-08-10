@@ -1,7 +1,7 @@
 """
 This module should connect to datastore to get data e.g., topology
 """
-from topology import Topology
+from .topology import Topology
 
 
 class DatastoreProxy:
@@ -10,7 +10,7 @@ class DatastoreProxy:
 
 
     def get_topo(self):
-        topo = Topology('../topologies/' + self.topoJson)
+        topo = Topology(self.topoJson)
         return topo
 
 if __name__ == '__main__':

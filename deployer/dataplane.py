@@ -1,11 +1,10 @@
 from .value_type import *
 
 class Pipeline:
-    def __init__(self, port, pit):
-        self.port = port
+    def __init__(self, pit):
         self.pipelineTables = []
 
-        self.initialize(port, pit)
+        self.initialize(pit)
 
     def initialize(self, pit):
 
@@ -34,7 +33,7 @@ class Pipeline:
                     nameTable[input] = input
                 else:
                     if input not in nameTable:
-                        nameTable[input] = 'r' + regCount
+                        nameTable[input] = 'r' + str(regCount)
                         regCount += 1
 
             for output in outputs:
@@ -42,7 +41,7 @@ class Pipeline:
                     nameTable[output] = output
                 else:
                     if output not in nameTable:
-                        nameTable[output] = 'r' + regCount
+                        nameTable[output] = 'r' + str(regCount)
                         regCount += 1
         return nameTable
 
@@ -55,7 +54,9 @@ class Pipeline:
             for entry in entries:
                 kvs = entry['data']
                 for key in kvs:
+                    print(key)
                     value = kvs[key]
+                    print(value)
                     if get_type(value) == MAC or get_type(value) == IPv4 or get_type(value) == ANY\
                             or get_type(value) == SP or get_type(value) == STP or get_type(value) == DROP\
                             or get_type(value) == PUNT:
@@ -72,8 +73,13 @@ class Pipeline:
                         else:
                             valueTable = {}
                             valueTable[value] = 0
+                            nameValueTable[key] = valueTable
 
         return nameValueTable
+
+    def dump(self):
+        for pipelineTable in self.pipelineTables:
+            pipelineTable.dump()
 
 
 
@@ -96,6 +102,11 @@ class PipelineTable:
         for entry in entries:
             flowRule = FlowRule(entry, inputs, outputs, nameTable, nameValueTable)
             self.flowRules.append(flowRule)
+
+    def dump(self):
+        print("table id: " + str(self.tableId))
+        for flowrule in self.flowRules:
+            flowrule.dump()
 
 
 class FlowRule:
@@ -132,11 +143,14 @@ class FlowRule:
             else:
                 type = get_type(value)
                 if type == SP or type == STP or type == PUNT or type == DROP:
-                    action = GlobalAction(TERMINAL_ACTION, value)
+                    action = GlobalAction(TERMINAL_ACTION, value, None, None)
                     self.actions.append(action)
                 else:
-                    action = GlobalAction(NON_TERMINAL_ACTION, value)
+                    action = GlobalAction(NON_TERMINAL_ACTION, None, key, nameValueTable[key][value])
                     self.actions.append(action)
+
+    def dump(self):
+        print('pri:' + str(self.priority) + ' | matches:' + str(self.matches) + " | actions:" + str(self.actions))
 
 
 TERMINAL_ACTION = 0
@@ -144,9 +158,20 @@ NON_TERMINAL_ACTION = 1
 
 
 class GlobalAction:
-    def __init__(self, type, action):
+    def __init__(self, type, action, key, value):
         self.type = type
-        self.action = action
+        self.action = action  # is valid only type is TERMINAL_ACTION
+        self.key = key
+        self.value = value
+
+    def __str__(self):
+        return self.action
+
+    def __repr__(self):
+        if self.type == NON_TERMINAL_ACTION:
+            return "set " + str(self.key) + " to " + str(self.value)
+        else:
+            return self.action
 
 
 if __name__ == '__main__':
