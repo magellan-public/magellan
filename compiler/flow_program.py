@@ -74,6 +74,7 @@ class FlowProgram:
         self.get_variable("global_mac_table").value={"11:11:11:11:11:11":"s1:1","11:11:11:11:11:12":"s5:3"}
         for inst in self.instructions:
             inst.gen_pit()
+        self.instructions[0].pit=None
 
     def ret_pit_pipeline(self):
         retlist=[]
