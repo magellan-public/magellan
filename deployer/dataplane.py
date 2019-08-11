@@ -29,7 +29,7 @@ class Pipeline:
             outputs = schema.outputs
 
             for input in inputs:
-                if 'pkt' in input or input == 'inport_label':
+                if 'pkt' in input or input == 'inport_label' or input == 'inport':
                     nameTable[input] = input
                 else:
                     if input not in nameTable:
@@ -59,7 +59,7 @@ class Pipeline:
                     # print(value)
                     if get_type(value) == MAC or get_type(value) == IPv4 or get_type(value) == ANY\
                             or get_type(value) == SP or get_type(value) == STP or get_type(value) == DROP\
-                            or get_type(value) == PUNT or get_type(value) == LABEL:
+                            or get_type(value) == PUNT or is_special_code_by_key(key):
                         continue
                     else:
                         if key in nameValueTable:
@@ -87,7 +87,8 @@ class PipelineTable:
         self.tableId = id
         self.matches = []
         self.flowRules = []
-
+        if id == -1:
+            return
         self.initialize(table, nameTable, nameValueTable)
 
     def initialize(self, table, nameTable, nameValueTable):
@@ -123,6 +124,9 @@ class FlowRule:
         self.matches = {}
         self.actions = []
 
+        if inputs is None:
+            return
+
         self.initialize(entry, inputs, outputs, nameTable, nameValueTable)
 
     '''
@@ -138,7 +142,7 @@ class FlowRule:
             value = kvs[key]
             if key in inputs:
                 type = get_type(value)
-                if type == MAC or type == IPv4 or type == ANY or type == LABEL:
+                if type == MAC or type == IPv4 or type == ANY or is_special_code_by_key(key):
                     self.matches[nameTable[key]] = value
                 else:
                     self.matches[nameTable[key]] = nameValueTable[key][value]

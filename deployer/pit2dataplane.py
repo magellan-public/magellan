@@ -15,11 +15,13 @@ def extract_port_stp(stpStr):
     temp = temp.replace(")", "")
     return temp
 
+
 def construct_vlan_action(vlanId):
-    return "set_vlan(" + str(vlanId) + ")"
+    return ("set_vlan", vlanId)
+
 
 def construct_outport_action(outport):
-    return "outport(" + str(outport) + ")"
+    return ("output",  outport)
 
 
 class FlowRulesGenerator:
@@ -121,13 +123,41 @@ class FlowRulesGenerator:
                 if remove:
                     pipelineTable.flowRules.remove(flowrule)
 
-
-
     def dump(self):
         for port in self.dataplane:
             print("port: " + str(port))
             self.dataplane[port].dump()
 
-
-
+    def get_per_switch_config(self):
+        per_switch_config = {}
+        for sw_port, pipe in self.dataplane.items():
+            sw, port = sw_port.split(":")
+            per_switch_config.setdefault(sw, {})
+            table_map = per_switch_config.get(sw)
+            if isinstance(pipe, Pipeline):
+                for t in pipe.pipelineTables:
+                    if isinstance(t, PipelineTable):
+                        t1 = table_map.get(t.tableId)
+                        if t1 is None:
+                            table_map[t.tableId] = t
+                        else:
+                            assert t1.matches == t.matches
+                            t1.flowRules.extend(t.flowRules)
+            elif isinstance(pipe, VlanTable):
+                t = pipe
+                t1 = table_map.get(-1)  # type: PipelineTable
+                if t1 is None:
+                    t1 = PipelineTable(-1, None, None, None)
+                    table_map[-1] = t1
+                    t1.matches = ["port", "vlan"]
+                    flow = FlowRule({"pri":0}, None, None, None, None)
+                    flow.matches = {}
+                    flow.actions = []
+                    t1.flowRules.append(flow)
+                for vlanId, action in t.matches.items():
+                    flow = FlowRule({"pri":1}, None, None, None, None)
+                    flow.matches = {"inport": sw_port, "vlan":vlanId}
+                    flow.actions = [('vlan_output', action)]
+                    t1.flowRules.append(flow)
+        return per_switch_config
 

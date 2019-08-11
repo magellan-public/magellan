@@ -10,8 +10,11 @@ DROP = 6
 PUNT = 7
 Null = 8
 ANY = 9
-LABEL = 10
 
+def is_special_code_by_key(key):
+    if key == 'inport_label' or key == 'inport':
+        return True
+    return False
 
 def get_type(value):
     if value == 'True' or value == 'False':
@@ -34,5 +37,3 @@ def get_type(value):
         return Null
     elif value == '*':
         return ANY
-    else:
-        return LABEL
