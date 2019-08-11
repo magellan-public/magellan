@@ -170,4 +170,7 @@ class Topology:
 
 if __name__ == '__main__':
     topology = Topology("../topologies/l2.json")
+    from matplotlib import pyplot as plt
+    nx.draw(topology.fullG)
+    plt.show()
     print(topology.path_in_stp('s1:1', 'h2:1'))

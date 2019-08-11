@@ -78,52 +78,52 @@ class Instruction:
                 entry[DATA].update({self.gv.name:FALSE})
             self.pit.entries.append(entry)
         elif self.mapping == 'neq' or self.mapping == 'eq':
-        	if self.mapping == 'neq':
-        		Ebiao=FALSE
-        		NEbiao=TRUE
-        	else:
-        		Ebiao=TRUE
-        		NEbiao=FALSE
-        	for input in self.inputs:
-        	    self.pit.schema.inputs.append(input.name)
-        	if isinstance(self.inputs[0],ConstantVariable):
-        	    self.pit.schema.inputs.remove(self.inputs[0].name)
-        	    Biao=0
-        	elif isinstance(self.inputs[1],ConstantVariable):
-        	    self.pit.schema.inputs.remove(self.inputs[1].name)
-        	    Biao=1
-        	elif (len(self.inputs[0].value)<len(self.inputs[1].value)):
-        		Biao=0
-        	else:
-        	    Biao=1
-        	for ev in self.inputs[Biao].value:
-        	    if isinstance(self.inputs[Biao],ConstantVariable):
-        	        entry = {
+            if self.mapping == 'neq':
+                Ebiao=FALSE
+                NEbiao=TRUE
+            else:
+                Ebiao=TRUE
+                NEbiao=FALSE
+            for input in self.inputs:
+                self.pit.schema.inputs.append(input.name)
+            if isinstance(self.inputs[0],ConstantVariable):
+                self.pit.schema.inputs.remove(self.inputs[0].name)
+                Biao=0
+            elif isinstance(self.inputs[1],ConstantVariable):
+                self.pit.schema.inputs.remove(self.inputs[1].name)
+                Biao=1
+            elif (len(self.inputs[0].value)<len(self.inputs[1].value)):
+                Biao=0
+            else:
+                Biao=1
+            for ev in self.inputs[Biao].value:
+                if isinstance(self.inputs[Biao],ConstantVariable):
+                    entry = {
                     PRIORITY:1,
                     DATA:{
                     self.inputs[(1-Biao)].name: ev,
                     self.outputs[0].name: Ebiao}
                     }
-        	    else:
-        	        entry = {
+                else:
+                    entry = {
                         PRIORITY:1,
                         DATA:{
                         self.inputs[0].name: ev,
                         self.inputs[1].name: ev,
                         self.outputs[0].name: Ebiao}
                     }
-        	    if self.gv is not None:
-        	        entry[DATA].update({self.gv.name:TRUE})
-        	    self.pit.entries.append(entry)
-        	if isinstance(self.inputs[Biao],ConstantVariable):
-        	    entryD = {
+                if self.gv is not None:
+                    entry[DATA].update({self.gv.name:TRUE})
+                self.pit.entries.append(entry)
+            if isinstance(self.inputs[Biao],ConstantVariable):
+                entryD = {
                     PRIORITY:0,
                     DATA:{
                     self.inputs[(1-Biao)].name: MATCHANY,
                     self.outputs[0].name: NEbiao}
                     }
-        	else:
-        	    entryD = {
+            else:
+                entryD = {
                     PRIORITY:0,
                     DATA:{
                     self.inputs[0].name: MATCHANY,
@@ -131,9 +131,9 @@ class Instruction:
                     self.outputs[0].name: NEbiao}
                 }
 
-        	if self.gv is not None:
-        	    entryD[DATA].update({self.gv.name:TRUE})
-        	self.pit.entries.append(entryD)
+            if self.gv is not None:
+                entryD[DATA].update({self.gv.name:TRUE})
+            self.pit.entries.append(entryD)
         elif self.mapping == 'assign' :  #input can't be map
             if  self.outputs[0].name == "return":
                 self.pit=None
@@ -152,22 +152,22 @@ class Instruction:
                         entry[DATA].update({self.gv.name:TRUE})
                     self.pit.entries.append(entry)
         elif self.mapping == 'shortestPath':
-        	for input in self.inputs:
-        	    self.pit.schema.inputs.append(input.name)
-        	for i in self.inputs[0].value:
-        	 	for j in self.inputs[1].value:
-        	 	    entry = {
-	                PRIORITY:1,
-	                DATA :{
-	                    self.inputs[0].name: i,
-	                    self.inputs[1].name: j,
-	                    self.outputs[0].name: "shortestPath("+i+","+j+")"
-	                    }
-	                }
-        	 	    self.outputs[0].value.append( "shortestPath("+i+","+j+")")
-        	 	    if self.gv is not None:
-        	 	        entry[DATA].update({self.gv.name:TRUE})
-        	 	    self.pit.entries.append(entry)
+            for input in self.inputs:
+                self.pit.schema.inputs.append(input.name)
+            for i in self.inputs[0].value:
+                for j in self.inputs[1].value:
+                    entry = {
+                    PRIORITY:1,
+                    DATA :{
+                        self.inputs[0].name: i,
+                        self.inputs[1].name: j,
+                        self.outputs[0].name: "shortestPath("+i+","+j+")"
+                        }
+                    }
+                    self.outputs[0].value.append( "shortestPath("+i+","+j+")")
+                    if self.gv is not None:
+                        entry[DATA].update({self.gv.name:TRUE})
+                    self.pit.entries.append(entry)
         elif self.mapping == 'spanningTree' : 
             for input in self.inputs:
                 self.pit.schema.inputs.append(input.name)
@@ -189,15 +189,15 @@ class Instruction:
                 self.pit.schema.inputs.append(input.name)
 
             self.pit.entries.append({
-            	PRIORITY:1,
-            	DATA:{
+                PRIORITY:1,
+                DATA:{
                 self.gv.name:TRUE,
                 self.inputs[0].name: TRUE,
                 self.outputs[0].name: FALSE}
             })
             self.pit.entries.append({
-            	PRIORITY:1,
-            	DATA:{
+                PRIORITY:1,
+                DATA:{
                 self.gv.name:TRUE,
                 self.inputs[0].name: FALSE,
                 self.outputs[0].name: TRUE}
@@ -207,12 +207,20 @@ class Instruction:
                 self.pit.schema.inputs.append(input.name)
 
             self.pit.entries.append({
-            	PRIORITY:1,
-            	DATA:{
+                PRIORITY:1,
+                DATA:{
                 self.gv.name:TRUE,
                 self.inputs[0].name: MATCHANY,
                 self.inputs[1].name: MATCHANY,
                 self.outputs[0].name: "toController"}
+            })
+            self.pit.entries.append({
+                PRIORITY:0,
+                DATA:{
+                self.gv.name:TRUE,
+                self.inputs[0].name: MATCHANY,
+                self.inputs[1].name: MATCHANY,
+                self.outputs[0].name: NONSENSE}
             })
             
         else:

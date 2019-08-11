@@ -106,7 +106,10 @@ class OpenFlowAdapter:
             error("error port format")
 
     def _convert_sw_port(self, port):
-        sw, port = port.split(':')
+        try:
+            sw, port = port.split(':')
+        except ValueError:
+            error(port)
         return int(port)
 
 

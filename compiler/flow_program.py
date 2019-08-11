@@ -70,8 +70,8 @@ class FlowProgram:
         return variable
 
     def gen_pit_pipeline(self):
-        self.get_variable("inport").value.extend(["s1:1","s5:3"])
-        # self.get_variable("global_mac_table").value={"11:11:11:11:11:11":"s1:1","11:11:11:11:11:12":"s5:3"}
+        self.get_variable("inport").value.extend(["s1:1","s5:1"])
+        self.get_variable("global_mac_table").value={"00:00:00:00:00:02":"s1:1","00:00:00:00:00:01":"s5:1"}
         for inst in self.instructions:
             inst.gen_pit()
 
