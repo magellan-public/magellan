@@ -214,14 +214,14 @@ class Instruction:
                 self.inputs[1].name: MATCHANY,
                 self.outputs[0].name: "toController"}
             })
-            self.pit.entries.append({
-                PRIORITY:0,
-                DATA:{
-                self.gv.name:TRUE,
-                self.inputs[0].name: MATCHANY,
-                self.inputs[1].name: MATCHANY,
-                self.outputs[0].name: NONSENSE}
-            })
+            # self.pit.entries.append({
+            #     PRIORITY:0,
+            #     DATA:{
+            #     self.gv.name:TRUE,
+            #     self.inputs[0].name: MATCHANY,
+            #     self.inputs[1].name: MATCHANY,
+            #     self.outputs[0].name: NONSENSE}
+            # })
             
         else:
             for input in self.inputs:

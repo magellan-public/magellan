@@ -1,6 +1,7 @@
 from deployer.dataplane import Pipeline, PipelineTable, FlowRule, GlobalAction
 import deployer.dataplane
 import re
+import os
 
 
 def error(*msg):
@@ -13,24 +14,35 @@ class OpenFlowAdapter:
         pass
 
     def update(self, per_switch_config):
+        for i in range(1,6):
+            self._delete_all("s"+str(i))
         for sw, pipe in per_switch_config.items():
             self._update_sw(sw, pipe)
 
     def _update_sw(self, sw, pipe):
-        self._delete_all(sw)
+        # self._delete_all(sw)
         for tid, table in pipe.items(): # type: int, PipelineTable
             for f in table.flowRules: # type: FlowRule
+                f.priority+=10
                 self._install_flow(sw, tid+1, f)
+            self._install_flow(sw, tid+1, FlowRule({"pri":0}, None, None, None, None))
+
+    def _system_cmd(self, cmd):
+        print(cmd)
+        if os.getuid()==0:
+            os.system(cmd)
+        else:
+            print("no permission")
 
     def _delete_all(self, sw):
-        print("ovs-ofctl del-flows", sw)
+        self._system_cmd("ovs-ofctl del-flows %s"%sw)
 
     def _install_flow(self, sw, tid, flow):
         # flow.dump()
         priority, matches, actions = self._convert(flow, tid + 1)
         matches_str = ','.join(str(f)+"="+str(v) for f,v in matches.items())
         actions_str = ','.join(actions)
-        print("ovs-ofctl add-flow %s -OOpenFlow13 \"table=%d, priority=%d, %s, actions=%s\"" %(sw, tid, priority, matches_str, actions_str))
+        self._system_cmd("ovs-ofctl add-flow %s -OOpenFlow13 \"table=%d, priority=%d, %s, actions=%s\"" %(sw, tid, priority, matches_str, actions_str))
 
     def _convert(self, flow, next_table):
         matches = {}
