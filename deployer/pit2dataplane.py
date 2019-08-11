@@ -47,6 +47,15 @@ class FlowRulesGenerator:
 
             self.update_tagged_port(port, portTag, pipeline)
             self.update_action(pipeline)
+            self.remove_redundant_flowrule_with_inport(pipeline, port)
+    
+    def remove_redundant_flowrule_with_inport(self, pipeline, port):
+        for pipelineTable in pipeline.pipelineTables:
+            for flowrule in pipelineTable.flowRules[:]:
+                if 'inport' in flowrule.matches:
+                    value = flowrule.matches['inport']
+                    if str(value) != str(port):
+                        pipelineTable.flowRules.remove(flowrule)
 
     def update_tagged_port(self, port, tag, pipeline):
         for pipelineTable in pipeline.pipelineTables:
