@@ -1,6 +1,7 @@
 # from grpc_server import serve
 from compiler import compile
 from deployer.pit2dataplane import *
+from adapter.openflow import OpenFlowAdapter
 
 if __name__ == '__main__':
 
@@ -25,6 +26,8 @@ if __name__ == '__main__':
     fg.accept_new_pit(portTag, pipeline)
     fg.dump()
 
+    of_adp = OpenFlowAdapter()
+    of_adp.update(fg.get_per_switch_config())
     
     # t = Thread(target=serve, args=(fp)).start()
     # serve()

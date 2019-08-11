@@ -87,7 +87,8 @@ class PipelineTable:
         self.tableId = id
         self.matches = []
         self.flowRules = []
-
+        if id == -1:
+            return
         self.initialize(table, nameTable, nameValueTable)
 
     def initialize(self, table, nameTable, nameValueTable):
@@ -122,6 +123,9 @@ class FlowRule:
         self.priority = entry['pri']
         self.matches = {}
         self.actions = []
+
+        if inputs is None:
+            return
 
         self.initialize(entry, inputs, outputs, nameTable, nameValueTable)
 
