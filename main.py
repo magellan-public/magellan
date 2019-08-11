@@ -9,7 +9,8 @@ if __name__ == '__main__':
     dp_file = app_dir + '/on_packet.mag'
     offline_file = app_dir + '/offline.py'
     out_dir = 'out'
-    portTag, pipeline = compile(dp_file, None)
+    ds_file = app_dir + '/ds.json'
+    portTag, pipeline = compile(dp_file, ds_file)
 
     '''
     for table in pipeline:
