@@ -54,7 +54,7 @@ class FlowRulesGenerator:
             for flowrule in pipelineTable.flowRules[:]:
                 if 'inport' in flowrule.matches:
                     value = flowrule.matches['inport']
-                    if str(value) != str(port):
+                    if str(value) != str(port) and str(value)!="*":
                         pipelineTable.flowRules.remove(flowrule)
 
     def update_tagged_port(self, port, tag, pipeline):

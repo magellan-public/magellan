@@ -7,6 +7,7 @@ DATA="data"
 TRUE="True"
 FALSE="False"
 
+
 class Instruction:
     def __init__(self, gv, inputs, outputs, mapping):
         self.gv = gv
@@ -75,7 +76,7 @@ class Instruction:
                     }
             }
             if self.gv is not None:
-                entry[DATA].update({self.gv.name:FALSE})
+                entry[DATA].update({self.gv.name:TRUE})
             self.pit.entries.append(entry)
         elif self.mapping == 'neq' or self.mapping == 'eq':
             if self.mapping == 'neq':
