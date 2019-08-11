@@ -8,6 +8,7 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ether_types
 import json
+import os
 
 
 class SimpleSwitch(app_manager.RyuApp):
@@ -16,29 +17,22 @@ class SimpleSwitch(app_manager.RyuApp):
     def __init__(self, *args, **kwargs):
         super(SimpleSwitch, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
+        self.ds = {"global_mac_table": {
+        }}
 
-    def add_flow(self, datapath, in_port, dst, src, actions):
-        ofproto = datapath.ofproto
-
-        match = datapath.ofproto_parser.OFPMatch(
-            in_port=in_port,
-            dl_dst=haddr_to_bin(dst), dl_src=haddr_to_bin(src))
-
-        mod = datapath.ofproto_parser.OFPFlowMod(
-            datapath=datapath, match=match, cookie=0,
-            command=ofproto.OFPFC_ADD, idle_timeout=0, hard_timeout=0,
-            priority=ofproto.OFP_DEFAULT_PRIORITY,
-            flags=ofproto.OFPFF_SEND_FLOW_REM, actions=actions)
-        datapath.send_msg(mod)
 
     def recompile(self):
-        global_mac_table = {}
+        global_mac_table = self.ds['global_mac_table']
         for dpid in self.mac_to_port:
             for mac in self.mac_to_port[dpid]:
                 global_mac_table[mac] = self.mac_to_port[dpid] + ':' + self.mac_to_port[dpid][mac]
 
-        with open('ds.json', 'w') as fp:
-            fp.write(json.dumps(global_mac_table))
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        with open(dir_path + '/ds.json', 'w') as fp:
+            fp.write(json.dumps(self.ds))
+
+        path = os.path.dirname(os.path.dirname(dir_path))
+        os.system('python3 ' + path + '/main.py')
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
@@ -62,6 +56,8 @@ class SimpleSwitch(app_manager.RyuApp):
 
         # learn a mac address to avoid FLOOD next time.
         self.mac_to_port[dpid][src] = msg.in_port
+
+        return self.recompile()
 
         if dst in self.mac_to_port[dpid]:
             out_port = self.mac_to_port[dpid][dst]
