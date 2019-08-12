@@ -36,7 +36,9 @@ class SimpleSwitch(app_manager.RyuApp):
         with open(dir_path + '/ds.json', 'w') as fp:
             fp.write(json.dumps(self.ds))
 
-        path = os.path.dirname(os.path.dirname(dir_path))
+        path = dir_path
+        for i in range(3):
+            path = os.path.dirname(path)
         os.system('sudo python3 ' + path + '/main.py')
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
