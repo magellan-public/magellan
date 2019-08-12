@@ -44,7 +44,7 @@ class P4Adapter:
             template = Template(f.read())
             result = template.render(tables=tables, variables=variables)
             f2.write(result)
-        with open(self._result_dir + 'runtime-%s.p4'%str(sw),'w') as f:
+        with open(self._result_dir + 'runtime-%s.json'%str(sw),'w') as f:
             json.dump(sw_flows, f, indent=2)
 
     def _parse_table(self, table):
