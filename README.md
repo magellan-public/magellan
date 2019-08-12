@@ -6,10 +6,15 @@ This compiler has 2 functions:
 2. Generate runtime program on Controller
 
 ## Directories
-* apps - The use cases 
-* compiler - The core compiler
-* magellan - The library for writing offline program
-* out - The generated P4 files and runtime program
+* compiler - the core compiler
+* deployer - convert global PIT to per-switch Pipeline
+* adapter  - convert per-switch Pipeline to device configuration
+* proto   - not used
+* resource - resource file
+* utils    - utility
+* test
+    * apps - use cases
+    * topology - test topology 
 
 ## Compiler Process
 1. Takes in an application directory as compiler source

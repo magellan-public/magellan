@@ -1,12 +1,9 @@
-from deployer.dataplane import Pipeline, PipelineTable, FlowRule, GlobalAction
-import deployer.dataplane
-import re
 import os
+import re
 
-
-def error(*msg):
-    print(*msg)
-    exit(-1)
+import deployer.dataplane
+from deployer.dataplane import PipelineTable, FlowRule, GlobalAction
+from utils.utils import error
 
 
 class OpenFlowAdapter:
@@ -14,13 +11,11 @@ class OpenFlowAdapter:
         pass
 
     def update(self, per_switch_config):
-        for i in range(1,6):
-            self._delete_all("s"+str(i))
         for sw, pipe in per_switch_config.items():
             self._update_sw(sw, pipe)
 
     def _update_sw(self, sw, pipe):
-        # self._delete_all(sw)
+        self._delete_all(sw)
         for tid, table in pipe.items(): # type: int, PipelineTable
             for f in table.flowRules: # type: FlowRule
                 f.priority+=10
@@ -123,7 +118,6 @@ class OpenFlowAdapter:
         except ValueError:
             error(port)
         return int(port)
-
 
     def _convert_reg(self, reg):
         mat = re.match(r'r(\d+)', reg)

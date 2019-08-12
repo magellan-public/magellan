@@ -1,6 +1,6 @@
 from .dataplane import *
 from .simple_vlan_dataplane import *
-from .datastore_proxy import DatastoreProxy
+
 
 def extract_ports(spStr):
     temp = spStr.replace("shortestPath", "")
@@ -8,6 +8,7 @@ def extract_ports(spStr):
     temp = temp.replace(")", "")
     src_port, dst_port = temp.split(",")
     return src_port, dst_port
+
 
 def extract_port_stp(stpStr):
     temp = stpStr.replace("spanningTree", "")
@@ -138,7 +139,9 @@ class FlowRulesGenerator:
             self.dataplane[port].dump()
 
     def get_per_switch_config(self):
-        per_switch_config = {}
+        per_switch_config = {} # type: {str: {}}
+        for sw in self.topology.get_switches():
+            per_switch_config.setdefault(sw['id'], {}) # TODO
         for sw_port, pipe in self.dataplane.items():
             sw, port = sw_port.split(":")
             per_switch_config.setdefault(sw, {})
@@ -158,11 +161,12 @@ class FlowRulesGenerator:
                 if t1 is None:
                     t1 = PipelineTable(-1, None, None, None)
                     table_map[-1] = t1
-                    t1.matches = ["port", "vlan"]
-                    flow = FlowRule({"pri":0}, None, None, None, None)
-                    flow.matches = {}
-                    flow.actions = []
-                    t1.flowRules.append(flow)
+                    t1.matches = ["inport", "vlan"]
+                    # t1.actions = ["vlan_output"]
+                    # flow = FlowRule({"pri":0}, None, None, None, None)
+                    # flow.matches = {}
+                    # flow.actions = []
+                    # t1.flowRules.append(flow)
                 for vlanId, action in t.matches.items():
                     flow = FlowRule({"pri":1}, None, None, None, None)
                     flow.matches = {"inport": sw_port, "vlan":vlanId}

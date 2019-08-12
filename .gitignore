@@ -4,3 +4,4 @@ venv
 .vs
 *.pyproj
 *.sln
+out/

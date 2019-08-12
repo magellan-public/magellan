@@ -1,5 +1,5 @@
 from compiler.variable import Variable, ConstantVariable, TupleVariable
-from jinja2 import Template
+
 
 class FlowProgram:
     def __init__(self, variables=None):
@@ -81,6 +81,7 @@ class FlowProgram:
             if not(inst.pit is None):
                 retlist.append(inst.pit)
         return self.get_variable('__v1').value[0],retlist   #port_label, list(pit_table)
+
     def dump(self):
         print('++++++ flow program ++++++')
         for inst in self.instructions:
@@ -92,16 +93,16 @@ class FlowProgram:
             inst.dump_pit()
             print('')
 
-    def gen_p4(self):
-        tables = []
-        for (idx, inst) in enumerate(self.instructions):
-            table = {
-                'name': 't' + str(idx+1),
-                'matches': inst.pit.schema.inputs,
-                'actions': inst.pit.schema.outputs[0]
-            }
-            tables.append(table)
-
-        with open('p4.tpl') as f:
-            template = Template(f.read())
-            print(template.render(tables=tables))
+    # def gen_p4(self):
+    #     tables = []
+    #     for (idx, inst) in enumerate(self.instructions):
+    #         table = {
+    #             'name': 't' + str(idx+1),
+    #             'matches': inst.pit.schema.inputs,
+    #             'actions': inst.pit.schema.outputs[0]
+    #         }
+    #         tables.append(table)
+    #
+    #     with open('p4.tpl') as f:
+    #         template = Template(f.read())
+    #         print(template.render(tables=tables))

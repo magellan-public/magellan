@@ -1,5 +1,6 @@
 from .value_type import *
 
+
 class Pipeline:
     def __init__(self, pit):
         self.pipelineTables = []
@@ -79,13 +80,11 @@ class Pipeline:
             pipelineTable.dump()
 
 
-
-
-
 class PipelineTable:
     def __init__(self, id, table, nameTable, nameValueTable):
         self.tableId = id
         self.matches = []
+        self.actions = []
         self.flowRules = []
         if id == -1:
             return
@@ -106,8 +105,10 @@ class PipelineTable:
             match = nameTable[input]
             self.matches.append(match)
 
+        # self.actions = [('set', tuple(nameTable[o] for o in outputs))]
+
     def dump(self):
-        print("table id: " + str(self.tableId))
+        print("table id: " + str(self.tableId) +" match: "+str(self.matches) + " action: "+str(self.actions))
         for flowrule in self.flowRules:
             flowrule.dump()
 

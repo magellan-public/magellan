@@ -13,9 +13,10 @@ class DatastoreProxy:
         topo = Topology(self.topoJson)
         return topo
 
-if __name__ == '__main__':
-    ds = DatastoreProxy('l2.json')
-    topo = ds.get_topo()
-    #print(topo.get_host_ports())
-    print(topo.get_external_ports())
+#
+# if __name__ == '__main__':
+#     ds = DatastoreProxy('l2.json')
+#     topo = ds.get_topo()
+#     #print(topo.get_host_ports())
+#     print(topo.get_external_ports())
 
