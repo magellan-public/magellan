@@ -117,7 +117,7 @@ control MyIngress(inout headers hdr,
         hdr.tag.setValid();
         hdr.tag.tag = tag;
         hdr.tag.innerEthType = hdr.ethernet.etherType;
-        hdr.ethernet.etherType = 0xfff;
+        hdr.ethernet.etherType = 0xffff;
         standard_metadata.egress_spec = port;
     }
 
