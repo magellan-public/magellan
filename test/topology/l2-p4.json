@@ -1,0 +1,126 @@
+{
+    "nodes": [
+        {
+            "type": "switch",
+            "id": "s1",
+            "ports": ["s1:1", "s1:2", "s1:3"],
+            "address": "172.17.0.2:50051"
+        },
+        {
+            "type": "switch",
+            "id": "s2",
+            "ports": ["s2:1", "s2:2"],
+            "address": "172.17.0.2:50052"
+        },
+        {
+            "type": "switch",
+            "id": "s3",
+            "ports": ["s3:1", "s3:2"],
+            "address": "172.17.0.2:50053"
+        },
+        {
+            "type": "switch",
+            "id": "s4",
+            "ports": ["s4:1", "s4:2"],
+            "address": "172.17.0.2:50054"
+        },
+        {
+            "type": "switch",
+            "id": "s5",
+            "ports": ["s5:1", "s5:2", "s5:3"],
+            "address": "172.17.0.2:50055"
+        },
+        {
+            "type": "host",
+            "id": "h1",
+            "ports": ["h1:0"]
+        },
+        {
+            "type": "host",
+            "id": "h2",
+            "ports": ["h2:0"]
+        }
+    ],
+    "ports": [
+        {
+            "id": "s1:1",
+            "tag": "external_ingress"
+        },
+        {
+            "id": "s5:1",
+            "tag": "external_ingress"
+        }
+    ],
+    "links": [
+        {
+            "source": "h1:0",
+            "destination": "s1:1",
+            "id": "h1:0-s1:1"
+        },
+        {
+            "source": "s1:1",
+            "destination": "h1:0",
+            "id": "s1:1-h1:0"
+        },
+        {
+            "source": "s1:2",
+            "destination": "s2:1",
+            "id": "s1:2-s2:1"
+        },
+        {
+            "source": "s2:1",
+            "destination": "s1:2",
+            "id": "s2:1-s1:2"
+        },
+        {
+            "source": "s2:2",
+            "destination": "s5:2",
+            "id": "s2:2-s5:2"
+        },
+        {
+            "source": "s5:2",
+            "destination": "s2:2",
+            "id": "s5:2-s2:2"
+        },
+        {
+            "source": "s1:3",
+            "destination": "s3:1",
+            "id": "s1:3-s3:1"
+        },
+        {
+            "source": "s3:1",
+            "destination": "s1:3",
+            "id": "s3:1-s1:3"
+        },
+        {
+            "source": "s3:2",
+            "destination": "s4:1",
+            "id": "s3:2-s4:1"
+        },
+        {
+            "source": "s4:1",
+            "destination": "s3:2",
+            "id": "s4:1-s3:2"
+        },
+        {
+            "source": "s4:2",
+            "destination": "s5:3",
+            "id": "s4:2-s5:3"
+        },
+        {
+            "source": "s5:3",
+            "destination": "s4:2",
+            "id": "s5:3-s4:2"
+        },
+        {
+            "source": "s5:1",
+            "destination": "h2:0",
+            "id": "s5:1-h2:0"
+        },
+        {
+            "source": "h2:0",
+            "destination": "s5:1",
+            "id": "h2:0-s5:1"
+        }
+    ]
+}

@@ -45,7 +45,13 @@ header tcp_t {
 
 struct metadata {
     {% for var in variables %}bit<{{var.len}}> {{var.name}};
-    {% endfor %}
+    {% endfor %}bool terminal;
+}
+
+@controller_header("packet_in")
+header packet_in_header_t {
+    bit<9> ingress_port;
+    bit<7> _padding;
 }
 
 struct headers {
@@ -53,6 +59,7 @@ struct headers {
     tag_t      tag;
     ipv4_t     ipv4;
     tcp_t      tcp;
+    packet_in_header_t packet_in;
 }
 
 parser MyParser(packet_in packet,
@@ -110,7 +117,13 @@ control MyIngress(inout headers hdr,
     }
 
     action controller(){
-        standard_metadata.egress_spec = 0;
+        standard_metadata.egress_spec = 100;
+        hdr.packet_in.setValid();
+        hdr.packet_in.ingress_port = standard_metadata.ingress_port;
+    }
+
+    action set_terminal(){
+        meta.terminal = true;
     }
 
     action push_tag_output(bit<16> tag, bit<9> port){
@@ -144,9 +157,10 @@ control MyIngress(inout headers hdr,
     }
     {% endfor %}
     apply {
+        meta.terminal = false;
         if (hdr.ethernet.isValid()) {
-            {% for table in tables %}{{table.name}}.apply();
-            {% endfor %}
+            {% for table in tables %}if(!meta.terminal){{table.name}}.apply();
+            {% endfor %}if(!meta.terminal)drop();
         } else {
             drop();
         }
@@ -160,7 +174,7 @@ control MyEgress(inout headers hdr,
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-     apply {
+    apply {
     update_checksum(
         hdr.ipv4.isValid(),
             { hdr.ipv4.version,
@@ -181,6 +195,7 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
+        packet.emit(hdr.packet_in);
         packet.emit(hdr.ethernet);
         packet.emit(hdr.tag);
         packet.emit(hdr.ipv4);

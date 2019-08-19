@@ -1,11 +1,13 @@
 import re
 import json
+import hashlib
+import os
 
 from jinja2 import Template
 
 import deployer.dataplane
 from deployer.dataplane import PipelineTable, FlowRule, GlobalAction
-from utils.utils import error
+from utils.utils import error, parse_mac
 
 
 class P4Adapter:
@@ -16,14 +18,17 @@ class P4Adapter:
         self._result_dir = result_dir
 
     def update(self, per_switch_config):
+        p4_file_md5 = {}
         for sw, pipe in per_switch_config.items():
-            self._update_sw(sw, pipe)
+            p4_file_md5[sw] = self._update_sw(sw, pipe)
+        with open(self._result_dir + 'sw_p4.json', 'w') as f:
+            json.dump(p4_file_md5, f, indent=2)
 
     def _update_sw(self, sw, pipe):
         print('==================', sw)
         for tid, table in sorted(pipe.items()): # type: int, PipelineTable
             table.dump()
-        self._gen_p4(sw, pipe)
+        return self._gen_p4(sw, pipe)
 
     def _gen_p4(self, sw, pipe):
         tables = []
@@ -39,13 +44,20 @@ class P4Adapter:
                 'size' : 65536}
             tables.append(data)
             variables.update(regs)
-        variables = [{'name': n, 'len':2} for n in variables]
-        with open(self._template_file) as f, open(self._result_dir + 'pipe-%s.p4'%str(sw),'w') as f2:
+        variables = [{'name': n, 'len':2} for n in sorted(variables)]
+        with open(self._template_file) as f:
             template = Template(f.read())
             result = template.render(tables=tables, variables=variables)
-            f2.write(result)
+        h = hashlib.md5()
+        h.update(result.encode(encoding='utf-8'))
+        str_md5 = h.hexdigest()
+        p4_filepath = self._result_dir + 'pipe-%s.p4' % str_md5
+        if not os.path.exists(p4_filepath):
+            with open(p4_filepath,'w') as f2:
+                f2.write(result)
         with open(self._result_dir + 'runtime-%s.json'%str(sw),'w') as f:
             json.dump(sw_flows, f, indent=2)
+        return str_md5
 
     def _parse_table(self, table):
         TERNARY = 'ternary'
@@ -79,10 +91,10 @@ class P4Adapter:
             _, _, actions = self._convert_flow(table.flowRules[0])
             ret = self._parse_action(actions)
             str_map = {
-                'output': ('bit<9> port', 'output(port);'),
-                'controller': ('','controller();'),
-                'pop_tag_output': ('bit<9> port', 'pop_tag_output(port);'),
-                'push_tag_output': ('bit<16> tag, bit<9> port', 'push_tag_output(tag, port);')
+                'output': ('bit<9> port', 'output(port);set_terminal();'),
+                'controller': ('','controller();set_terminal();'),
+                'pop_tag_output': ('bit<9> port', 'pop_tag_output(port);set_terminal();'),
+                'push_tag_output': ('bit<16> tag, bit<9> port', 'push_tag_output(tag, port);set_terminal();')
             }
             if ret[0] in str_map:
                 action_parm_str, action_str = str_map[ret[0]]
@@ -99,7 +111,7 @@ class P4Adapter:
                 'priority': priority,
                 'matches': matches,
                 'action_name': 't%d_action'%(table.tableId+1),
-                'action_params': ret[1:]
+                'action_params': ret[1]
             })
         return table_headers, regs, action_parm_str, action_str, flows
 
@@ -107,19 +119,19 @@ class P4Adapter:
         if len(actions) == 1:
             a = actions[0]
             if a[0] == 'output':
-                return 'output', a[1]
+                return 'output', {'port' : int(a[1])}
             elif a[0] == 'set_field':
-                return 'set_field'+a[2], a[1]
+                return 'set_field'+a[2], {'v':int(a[1])}
             elif a[0] == 'controller':
-                return 'controller',
+                return 'controller', {}
             else:
                 error('unhandled actions', actions)
         elif len(actions) == 2:
             a1, a2 = actions
             if a1[0] == 'pop_vlan' and a2[0] == 'output':
-                return 'pop_tag_output', a2[1]
+                return 'pop_tag_output', {'port': int(a2[1])}
             elif a1[0] == 'set_vlan' and a2[0] == 'output':
-                return 'push_tag_output', a1[1], a2[1]
+                return 'push_tag_output', {'tag' :int(a1[1]), 'port': int(a2[1])}
             else:
                 error('unhandled actions', actions)
         else:
@@ -133,17 +145,17 @@ class P4Adapter:
             if value == '*':
                 continue
             if field == 'inport_label' or field=='inport':
-                matches['standard_metadata.ingress_port'] = self._convert_sw_port(value)
+                matches['standard_metadata.ingress_port'] = (self._convert_sw_port(value), 0x1ff, 9)
             elif field == 'vlan':
-                matches['hdr.tag.tag'] = value
+                matches['hdr.tag.tag'] = (int(value), 0xffff, 16)
             elif field == 'pkt.eth.src':
-                matches['hdr.ethernet.dst'] = value
+                matches['hdr.ethernet.src'] = parse_mac(value)
             elif field == 'pkt.eth.dst':
-                matches['hdr.ethernet.dst'] = value
+                matches['hdr.ethernet.dst'] = parse_mac(value)
             else:
                 reg = self._convert_reg(field)
                 if reg:
-                    matches['meta.'+reg] = value
+                    matches['meta.'+reg] = (int(value), 0x3, 2)
                 else:
                     error('unknown field', field)
         isterminal = False

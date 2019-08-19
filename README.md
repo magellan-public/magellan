@@ -5,6 +5,21 @@ This compiler has 2 functions:
 1. Translate high-level network-wide SDN program to P4 programs for each device
 2. Generate runtime program on Controller
 
+## Try first
+```sh
+# start Mininet-P4 and make sure the container ip is 172.17.0.2
+sudo docker run -it --rm --privileged dennisyu/mnp4
+cd /root
+./start.sh
+
+# start Magellan controller
+
+
+# test in Mininet
+h1 ping h2
+
+```
+
 ## Directories
 * compiler - the core compiler
 * deployer - convert global PIT to per-switch Pipeline
