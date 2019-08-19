@@ -6,7 +6,6 @@ import sys
 import json
 import queue
 import struct
-from time import sleep
 
 # Import P4Runtime lib from parent utils dir
 # Probably there's a better way of doing this.
@@ -167,22 +166,23 @@ class SwitchManager:
             self._conn.DeleteAllTableEntry()
         with open(self._tmp_dir + "runtime-%s.json"%self._name) as f:
             rules = json.load(f)
+            table_entry_list = []
             for tname, entries in rules.items():
                 for entry in entries:
-                    # print(entry)
                     table_entry = self._p4info_helper.buildTableEntry(
                         priority=int(entry["priority"])+1,
                         table_name="MyIngress.%s"%tname,
                         match_fields=entry["matches"],
                         action_name="MyIngress.%s"%entry["action_name"],
                         action_params=entry["action_params"])
-                    self._conn.WriteTableEntry(table_entry)
+                    table_entry_list.append(table_entry)
+            self._conn.WriteTableEntryList(table_entry_list)
 
     def parse_packet_ingress(self, pkt):
         for p in self._p4info_helper.p4info.controller_packet_metadata:
             for m in p.metadata:
                 if m.name == "ingress_port":
-                    print(pkt)
+                    # print(pkt)
                     for md in pkt.metadata:
                         if md.metadata_id == m.id:
                             return struct.unpack_from("!H", md.value)[0]
@@ -202,18 +202,18 @@ class Controller:
         self._datastore = {"global_mac_table": {}}
 
     def run(self):
-#        try:
-        self._connect()
-        self._compiler.compile_ast()
-        self._update()
-        while True:
-            id, msg = self._msg_queue.get()
-            if msg.packet:
-                self._on_packet(msg.packet, id)
-        # except KeyboardInterrupt:
-        #     print(" Shutting down.")
-        # except grpc.RpcError as e:
-        #     printGrpcError(e)
+        try:
+            self._connect()
+            self._compiler.compile_ast()
+            self._update()
+            while True:
+                id, msg = self._msg_queue.get()
+                if msg.packet:
+                    self._on_packet(msg.packet, id)
+        except KeyboardInterrupt:
+            print(" Shutting down.")
+        except grpc.RpcError as e:
+            printGrpcError(e)
         ShutdownAllSwitchConnections()
 
     def _connect(self):
@@ -228,6 +228,7 @@ class Controller:
                 device_id += 1
 
     def _update(self):
+        print("update configuration")
         self._compiler.compile_result(self._datastore)
         with open(self._tmp_dir + "sw_p4.json") as f:
             p4_file_md5 = json.load(f)
@@ -238,74 +239,27 @@ class Controller:
         dst, src, ethertype = struct.unpack_from('!6s6sH', pkt.payload)
         dst_mac = parse_mac(dst)
         src_mac = parse_mac(src)
-        print(src_mac, dst_mac, ethertype)
+        print("on_packet: src_mac=%s, dst_mac=%s, ethertype=0x%04x"%(src_mac, dst_mac, ethertype))
         inport = self._sw_mgr[sw_id].parse_packet_ingress(pkt)
         mt = self._datastore["global_mac_table"]
         if src_mac not in mt:
             name = self._sw_mgr[sw_id].get_name()
             mt[src_mac]= "%s:%d"%(name, inport)
-            print(mt)
+            # print(mt)
             self._update()
 
-#
-# def main():
-#     try:
-#         sw_l = []
-#         p4info_helper_l = []
-#         q = queue.Queue()
-#         for i in range(5):
-#             sw_l.append(p4runtime_lib.bmv2.Bmv2SwitchConnection(
-#                 name='s%d'%(i+1),
-#                 address='172.17.0.2:%d'%(50051+i),
-#                 device_id=i,
-#                 proto_dump_file='logs/s%d-p4runtime-requests.txt'%(i+1)))
-#             sw_l[i].MasterArbitrationUpdate()
-#             sw_l[i].start(i, q)
-#
-#             p4info_file_path = "pipe/pipe-s%d.p4.info.txt"%(i+1)
-#             bmv2_file_path = "pipe/pipe-s%d.p4.json"%(i+1)
-#             p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
-#             sw_l[i].SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-#                                                  bmv2_json_file_path=bmv2_file_path)
-#             p4info_helper_l.append(p4info_helper)
-#
-#             with open("pipe/runtime-s%d.json"%(i+1)) as f:
-#                 rules = json.load(f)
-#                 # rules = byteify(rules)
-#                 for tname, entries in rules.items():
-#                     for entry in entries:
-#                         print(entry)
-#                         table_entry = p4info_helper.buildTableEntry(
-#                             priority=int(entry["priority"])+1,
-#                             table_name="MyIngress.%s"%tname,
-#                             match_fields=entry["matches"],
-#                             action_name="MyIngress.%s"%entry["action_name"],
-#                             action_params=entry["action_params"])
-#                         sw_l[i].WriteTableEntry(table_entry)
-#
-#         for i in range(5):
-#             readTableRules(p4info_helper_l[i], sw_l[i])
-#
-#         # sleep(10)
-#         # for i in range(5):
-#         #     sw_l[i].DeleteAllTableEntry()
-#
-#         while True:
-#             id, msg = q.get()
-#             print(msg)
-#             dst, src, ethertype = struct.unpack_from('!6s6sH', msg.packet.payload)
-#             print((parse_mac(dst)))
-#             print((parse_mac(src)))
-#             print(ethertype)
-#             print((parse_packet_ingress(p4info_helper_l[id], msg.packet)))
-#
-#     except KeyboardInterrupt:
-#         print(" Shutting down.")
-#     except grpc.RpcError as e:
-#         printGrpcError(e)
-#
-#     ShutdownAllSwitchConnections()
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.description = 'Magellan controller.'
+    parser.add_argument('-a', "--app", help="magellan app file", type=str, required=True)
+    parser.add_argument('-t', "--topo", help="topology file", type=str, required=True)
+    args = parser.parse_args()
+    app = args.app
+    topo = args.topo
+    print("loading magellan application "+app)
+    # Controller("../apps/l2/on_packet.mag", "../topology/l2-p4.json").run()
+    Controller(app, topo).run()
 
 if __name__ == '__main__':
-    Controller("../apps/l2/on_packet.mag", "../topology/l2-p4.json").run()
+    main()

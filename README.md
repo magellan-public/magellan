@@ -13,7 +13,9 @@ cd /root
 ./start.sh
 
 # start Magellan controller
-
+sudo docker run -it --rm dennisyu/magctl
+cd /root
+./test.sh
 
 # test in Mininet
 h1 ping h2

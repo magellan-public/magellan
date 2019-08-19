@@ -166,7 +166,6 @@ class SwitchConnection(object):
         request2.election_id.low = 1
         for resp in self.client_stub.Read(request):
             for entity in resp.entities:
-                print(entity)
                 update = request2.updates.add()
                 update.type = p4runtime_pb2.Update.DELETE
                 update.entity.table_entry.CopyFrom(entity.table_entry)

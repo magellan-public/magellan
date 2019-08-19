@@ -25,9 +25,9 @@ class P4Adapter:
             json.dump(p4_file_md5, f, indent=2)
 
     def _update_sw(self, sw, pipe):
-        print('==================', sw)
-        for tid, table in sorted(pipe.items()): # type: int, PipelineTable
-            table.dump()
+        # print('==================', sw)
+        # for tid, table in sorted(pipe.items()): # type: int, PipelineTable
+        #     table.dump()
         return self._gen_p4(sw, pipe)
 
     def _gen_p4(self, sw, pipe):

@@ -106,7 +106,7 @@ class FlowRulesGenerator:
                                 continue
                             else:
                                 sp = self.topology.path_in_stp_full(src_port, port)
-                                print(sp)
+                                # print(sp)
 
                                 for idx, port_or_node in enumerate(sp):
                                     if ":" not in port_or_node:
