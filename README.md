@@ -5,7 +5,36 @@ This compiler has 2 functions:
 1. Translate high-level network-wide SDN program to P4 programs for each device
 2. Generate runtime program on Controller
 
-## Try first
+
+### System requirements
+* You need a Linux OS to run the compiler and demo apps, typically Ubuntu Server 16.04 is preferred
+* Make sure you have `python3` and `python3-pip` installed
+
+## Get Started
+Here we get started by compiling and running the L2 network which supports Mac learning and STP
+### Step1: Prepare for the mininet(BMv2) environment
+please refer to the link
+https://github.com/p4lang/behavioral-model
+
+### Step2: Clone the code to a directory
+```commandline
+# git clone --depth=1 https://github.com/magellan-public/magellan.git
+# cd magellan
+```
+### Step3: Install the dependencies
+```commandline
+# pip install -r requirements.txt
+```
+### Step4: Compile the L2 magellan application
+```commandline
+# magc -a test/apps/l2 -t test/apps/l2.json -o build
+```
+### Step5: Start mininet(BMv2) environment
+
+### Step6: Ping from h1 to h2
+In mininet CLI, emit the following command to test connectivity
+
+
 ```sh
 # start Mininet-P4 and make sure the container ip is 172.17.0.2
 sudo docker run -it --rm --privileged dennisyu/mnp4
@@ -22,29 +51,3 @@ h1 ping h2
 
 ```
 
-## Directories
-* compiler - the core compiler
-* deployer - convert global PIT to per-switch Pipeline
-* adapter  - convert per-switch Pipeline to device configuration
-* proto   - not used
-* resource - resource file
-* utils    - utility
-* test
-    * apps - use cases
-    * topology - test topology 
-
-## Compiler Process
-1. Takes in an application directory as compiler source
-2. For each `on_packet` function, translate it to a set of flow-programs
-3. For each flow-program, generate PIT pipeline (schema)
-4. Run offline program to initialize variables and generate PIT entries
-5. For each flow-program, project the PITs to each device on the `PATH` which the last PIT returns
-
-## Coding Notes
-* Use python3 interpreter so that we support python 3 annotation grammar
-
-## Architecture
-![Image text](https://raw.githubusercontent.com/guodong/magellan-pcl/master/docs/arch.png)
-
-## Workflows
-![Image text](https://raw.githubusercontent.com/guodong/magellan-pcl/master/docs/workflow.png)
