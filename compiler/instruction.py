@@ -322,6 +322,29 @@ class Instruction:
         # print '%s = func(%s)' % (s1, ' '.join(map(lambda s: astunparse.unparse(s), self.inputs)))
         # print '%s = assign(%s)' % (' '.join(map(lambda s: s.id, self.outputs)), ' '.join(map(lambda s: s.n, self.inputs)))
 
+    def dump_str(self):
+        ret = ""
+        if self.gv is not None:
+            if len(self.outputs) == 0:
+                ret += ('if %s: %s(%s)' % (self.gv.name, self.mapping,
+                                         ', '.join(map(lambda s: s.dump(), self.inputs))))
+                ret += "\n"
+            else:
+                ret += ('if %s: %s = %s(%s)' % (
+                self.gv.name, ', '.join(map(lambda s: s.dump(), self.outputs)), self.mapping,
+                ', '.join(map(lambda s: s.dump(), self.inputs))))
+                ret += "\n"
+        else:
+            if len(self.outputs) == 0:
+                ret += ('%s(%s)' % (self.mapping,
+                                  ', '.join(map(lambda s: s.dump(), self.inputs))))
+                ret += "\n"
+            else:
+                ret += ('%s = %s(%s)' % (', '.join(map(lambda s: s.dump(), self.outputs)), self.mapping,
+                                       ', '.join(map(lambda s: s.dump(), self.inputs))))
+                ret+="\n"
+        return ret
+
     def dump_pit(self):
         # if self.mapping == 'valof':
 
@@ -330,6 +353,7 @@ class Instruction:
         #     gv = self.gv.name
         #     print '%s | %s -> %s' % (gv, '|'.join(self.pit.schema.inputs), '|'.join(self.pit.schema.outputs))
         # else:
+        self.dump()
         if not(self.pit is None):
             print (PRIORITY,end='|')
             print ('%s -> %s' % ('|'.join(self.pit.schema.inputs), '|'.join(self.pit.schema.outputs)))
@@ -339,6 +363,21 @@ class Instruction:
                     print (entry[DATA][input_name], end= '|')
                 for output_name in self.pit.schema.outputs:
                     print (entry[DATA][output_name])
+
+    def dump_pit_str(self):
+        ret = self.dump_str()
+        if not(self.pit is None):
+            ret += (PRIORITY + '|')
+            ret += ('%s -> %s' % ('|'.join(self.pit.schema.inputs), '|'.join(self.pit.schema.outputs)))
+            ret += "\n"
+            for entry in self.pit.entries:
+                ret += (str(entry[PRIORITY]) + '|')
+                for input_name in self.pit.schema.inputs:
+                    ret += (str(entry[DATA][input_name]) + '|')
+                for output_name in self.pit.schema.outputs:
+                    ret += (str(entry[DATA][output_name]) + "\n")
+        return ret
+
 
     '''
     def dump_pit(self):

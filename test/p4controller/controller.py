@@ -9,7 +9,10 @@ import struct
 
 # Import P4Runtime lib from parent utils dir
 # Probably there's a better way of doing this.
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
+# sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
+
+sys.path.append("/pcl/magellan-pcl")
+
 
 from main import Compiler
 import p4runtime_lib.bmv2
@@ -158,7 +161,9 @@ class SwitchManager:
             bmv2_file_path = self._tmp_dir + "pipe-%s.p4.json" % p4_md5
             if not os.path.exists(p4info_file_path):
                 p4_file_path = self._tmp_dir + "pipe-%s.p4" % p4_md5
-                os.system("p4c-bm2-ss --p4v 16 --p4runtime-files %s -o %s %s"%(p4info_file_path, bmv2_file_path, p4_file_path))
+                p4c_cmd = "p4c-bm2-ss --p4v 16 --p4runtime-files %s -o %s %s" % (p4info_file_path, bmv2_file_path, p4_file_path)
+                os.system(p4c_cmd)
+                # os.system("sudo docker exec jovial_turing "+p4c_cmd)
             self._p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
             self._conn.SetForwardingPipelineConfig(p4info=self._p4info_helper.p4info,
                                             bmv2_json_file_path=bmv2_file_path)
@@ -248,6 +253,10 @@ class Controller:
             # print(mt)
             self._update()
 
+    def fake_compile(self):
+        self._compiler.compile_ast(verbose=True)
+        self._compiler.compile_result(self._datastore, verbose=True)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -258,8 +267,36 @@ def main():
     app = args.app
     topo = args.topo
     print("loading magellan application "+app)
-    # Controller("../apps/l2/on_packet.mag", "../topology/l2-p4.json").run()
     Controller(app, topo).run()
 
+def main1():
+    parser = argparse.ArgumentParser()
+    parser.description = 'Magellan compiler.'
+    parser.add_argument('-a', "--app", help="magellan app file", type=str, required=True)
+    parser.add_argument('-t', "--topo", help="topology file", type=str, required=True)
+    parser.add_argument('-o', "--output_dir", help="output directory", type=str, required=True)
+    args = parser.parse_args()
+    app = args.app
+    topo = args.topo
+    out = args.output_dir + "/"
+    # print("loading magellan application "+app)
+    Controller(app, topo, out).fake_compile()
+
+def main2():
+    parser = argparse.ArgumentParser()
+    parser.description = 'run Magellan application.'
+    parser.add_argument('-d', "--app_dir", help="magellan app directory", type=str, required=True)
+    args = parser.parse_args()
+    app = "app.mag"
+    topo = "topo.json"
+    Controller(app, topo).run()
+
+
 if __name__ == '__main__':
-    main()
+    if os.path.basename(sys.argv[0]) == 'magc':
+        main1()
+    elif os.path.basename(sys.argv[0]) == 'mag_run':
+        main2()
+    else: # test
+        Controller("../apps/l2/on_packet.mag", "../topology/l2-p4-4sw.json").run()
+        # main()

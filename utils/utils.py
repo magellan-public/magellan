@@ -7,3 +7,7 @@ def error(*msg):
 def parse_mac(s):
     assert isinstance(s, str)
     return (int(s.replace(':',''),16), 0xffffffffffff, 48)
+
+
+def unsupported():
+    raise AssertionError("unsupported")

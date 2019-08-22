@@ -8,3 +8,6 @@ class VlanTable:
 
     def dump(self):
         print(self.matches)
+
+    def dump_str(self):
+        return str(self.matches)+"\n"

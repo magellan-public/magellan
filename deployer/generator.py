@@ -138,6 +138,9 @@ class FlowRulesGenerator:
             print("port: " + str(port))
             self.dataplane[port].dump()
 
+    def dump_str(self):
+        return "\n".join("port: %s\n"%str(port) + dp.dump_str() for port,dp in self.dataplane.items())
+
     def get_per_switch_config(self):
         per_switch_config = {} # type: {str: {}}
         for sw in self.topology.get_switches():

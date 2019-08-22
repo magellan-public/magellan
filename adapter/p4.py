@@ -55,6 +55,10 @@ class P4Adapter:
         if not os.path.exists(p4_filepath):
             with open(p4_filepath,'w') as f2:
                 f2.write(result)
+        sw_filepath = self._result_dir + '%s.p4' % sw
+        if os.path.exists(sw_filepath):
+            os.remove(sw_filepath)
+        os.symlink('pipe-%s.p4' % str_md5, sw_filepath)
         with open(self._result_dir + 'runtime-%s.json'%str(sw),'w') as f:
             json.dump(sw_flows, f, indent=2)
         return str_md5

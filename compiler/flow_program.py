@@ -70,7 +70,7 @@ class FlowProgram:
         return variable
 
     def gen_pit_pipeline(self):
-        self.get_variable("inport").value.extend(["s1:1","s5:1"])
+        self.get_variable("inport").value.extend(["s1:1","s2:1"])
         #self.get_variable("global_mac_table").value={"00:00:00:00:00:02":"s1:1","00:00:00:00:00:01":"s5:1"}
         for inst in self.instructions:
             inst.gen_pit()
@@ -87,11 +87,22 @@ class FlowProgram:
         for inst in self.instructions:
             inst.dump()
 
+    def dump_str(self):
+        return "".join(i.dump_str() for i in self.instructions)
+
+
     def dump_pit(self):
         print('++++++ pit pipeline ++++++')
         for inst in self.instructions:
             inst.dump_pit()
             print('')
+
+    def dump_pit_str(self):
+        ret = ""
+        for inst in self.instructions:
+            ret += inst.dump_pit_str()
+            ret += "\n"
+        return ret
 
     # def gen_p4(self):
     #     tables = []

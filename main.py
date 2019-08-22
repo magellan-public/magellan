@@ -1,6 +1,7 @@
 import ast
 import json
 import os
+from time import sleep
 
 # from adapter.openflow import OpenFlowAdapter
 from adapter.p4 import P4Adapter
@@ -20,22 +21,48 @@ class Compiler:
         dir_path = os.path.dirname(os.path.abspath(__file__))
         self._template_file = dir_path + '/resource/p4_tag.tpl'
 
-    def compile_ast(self):
+    def compile_ast(self, verbose=False):
+        if verbose:
+            sleep(0.3)
+            print("compile %s"%str(self._source_file))
         with open(self._source_file, 'r') as f:
             self._ast_root = ast.parse(f.read())
 
-    def compile_result(self, variables):
+    def compile_result(self, variables, verbose=False):
         fp = FlowProgram(variables)
+        if verbose:
+            import pickle
+            with open(self._result_dir+"ds.pickle", "wb") as f:
+                f.write(pickle.dumps(fp))
+
         visitor = NodeVisitor(fp)
         visitor.visit(self._ast_root)
         # fp.dump()
+        if verbose:
+            sleep(0.3)
+            print("generate flow program")
+            with open(self._result_dir+"flowprogram.txt", "w") as f:
+                f.write(fp.dump_str())
+
         fp.gen_pit_pipeline()
         # fp.dump_pit()
+        if verbose:
+            sleep(0.3)
+            print("generate pit")
+            with open(self._result_dir+"pit.txt", "w") as f:
+                f.write(fp.dump_pit_str())
+
         portTag, pipeline = fp.ret_pit_pipeline()
         ds = DatastoreProxy(self._topo_file)
         fg = FlowRulesGenerator(ds)
         fg.accept_new_pit(portTag, pipeline)
         # fg.dump()
+        if verbose:
+            sleep(0.3)
+            print("generate datapath")
+            with open(self._result_dir+"datapath.txt", "w") as f:
+                f.write(fg.dump_str())
+
         p4_adp = P4Adapter(self._template_file, result_dir=self._result_dir)
         p4_adp.update(fg.get_per_switch_config())
 

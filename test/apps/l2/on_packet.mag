@@ -1,3 +1,4 @@
+from topology import shortestPath, spanningTree
 
 global_mac_table = {} # mac -> the 'h->e' port ('00:00...' -> 's1:1')
 

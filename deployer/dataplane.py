@@ -79,6 +79,12 @@ class Pipeline:
         for pipelineTable in self.pipelineTables:
             pipelineTable.dump()
 
+    def dump_str(self):
+        ret = ""
+        for pipelineTable in self.pipelineTables:
+            ret += pipelineTable.dump_str()
+        return ret
+
 
 class PipelineTable:
     def __init__(self, id, table, nameTable, nameValueTable):
@@ -108,9 +114,16 @@ class PipelineTable:
         # self.actions = [('set', tuple(nameTable[o] for o in outputs))]
 
     def dump(self):
-        print("table id: " + str(self.tableId) +" match: "+str(self.matches) + " action: "+str(self.actions))
+        print("table id: " + str(self.tableId))
         for flowrule in self.flowRules:
             flowrule.dump()
+
+    def dump_str(self):
+        ret = ("table id: " + str(self.tableId) + "\n")
+        for flowrule in self.flowRules:
+            ret += flowrule.dump_str()
+            ret += "\n"
+        return ret
 
 
 class FlowRule:
@@ -161,6 +174,9 @@ class FlowRule:
 
     def dump(self):
         print('pri:' + str(self.priority) + ' | matches:' + str(self.matches) + " | actions:" + str(self.actions))
+
+    def dump_str(self):
+        return 'pri:' + str(self.priority) + ' | matches:' + str(self.matches) + " | actions:" + str(self.actions)
 
 
 TERMINAL_ACTION = 0
