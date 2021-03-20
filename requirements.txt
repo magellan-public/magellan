@@ -10,7 +10,7 @@ greenlet==0.4.15
 grpcio==1.22.0
 grpcio-tools==1.22.0
 idna==2.8
-Jinja2==2.10.1
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 monotonic==1.5
 msgpack==0.6.1
