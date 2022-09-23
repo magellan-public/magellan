@@ -20,7 +20,7 @@ oslo.config==6.11.0
 oslo.i18n==3.23.1
 ovs==2.11.0
 pbr==5.4.2
-protobuf==3.9.0
+protobuf==3.18.3
 python3-protobuf==2.5.0
 pytz==2019.2
 PyYAML==5.1.2
